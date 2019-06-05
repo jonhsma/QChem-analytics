@@ -82,7 +82,9 @@ function [names,positions,charges] = readPositionsAndCharges(filePath)
     if isempty(positionStart)
         elementArray        =   elementArray(:,:,1:chunk-1); 
         coordinatesArray    =   coordinatesArray(:,:,1:chunk-1);
-        chargeArray         =   chargeArray(:,1:chunk-1);
+        if ~isnan(chargeArray)
+            chargeArray         =   chargeArray(:,1:chunk-1);
+        end
     end
     if(sum(sum(std(double(elementArray(:,:,:)),1,3)))~= 0)
        disp('Warning: Atomic element change during reaction detected. Check integrity of the input file') 
