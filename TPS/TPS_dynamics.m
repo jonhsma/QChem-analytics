@@ -40,7 +40,7 @@ function resultObject=TPS_dynamics(rings,sulphurIdx,carbonIdx,coordData,graph)
     proj_SB1 = diag(b1_n*sB(1).BV_n');
     proj_SB2 = diag(b2_n*sB(2).BV_n');
     proj_SB3 = diag(b3_n*sB(3).BV_n');
-    figure(graph+1)
+    figure(graph)
     subplot(3,1,1)
     plot(pi/2 - acos(abs([proj_SB1, proj_SB2, proj_SB3])))
     title('S-C bond benzene ring twisting angle')
