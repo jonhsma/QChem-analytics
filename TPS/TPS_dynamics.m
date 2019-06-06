@@ -51,7 +51,7 @@ function resultObject=TPS_dynamics(rings,sulphurIdx,carbonIdx,coordData,graph)
     title('Sulphur-Carbon bond length')
     
     % plot the distortiong in the benzene ring
-    figure(graph+1)
+    figure(graph)
     subplot(3,1,3)
     plot([b1_r, b2_r b3_r])
     title('Distortion (off plane variance) of the rings')
