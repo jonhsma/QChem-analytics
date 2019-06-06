@@ -46,7 +46,9 @@ function [names,positions,charges] = readPositionsAndCharges(filePath)
         %% Charges
         positionStart   = strfind(chunkText,'Ground-State Mulliken Net Atomic Charges');
         if isempty(positionStart)
-            chargeArray = NaN;
+            if chunk ==1
+                chargeArray = NaN;
+            end
             continue
         end
         positionEnd     = strfind(chunkText,'Sum of atomic charges');
