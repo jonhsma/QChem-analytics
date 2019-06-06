@@ -1,10 +1,11 @@
-function resultObject=TPS_dynamics(rings,sulphurIdx,coordData,graph)
+function resultObject=TPS_dynamics(rings,sulphurIdx,carbonIdx,coordData,graph)
     
     %For simplicity, now I'm only accepting 3 rings
     if ~(iscell(rings) && length(rings)==3)
         return
     end
     ring1idx = rings{1};
+    % n: normal; r: relative residue; c: center]
     [b1_n,b1_r,b1_c]=trackNormal(ring1idx,coordData);
     ring2idx = rings{2};
     [b2_n,b2_r,b2_c]=trackNormal(ring2idx,coordData);
@@ -23,29 +24,46 @@ function resultObject=TPS_dynamics(rings,sulphurIdx,coordData,graph)
     %}
 
     % Get the carbon sulphr bond pointing
-    sB1_BV = squeeze(coordData(2,:,:)-coordData(1,:,:));
-    sB1_BV_n = sB1_BV./sum(sB1_BV.*sB1_BV,1);
-    sB1_BV_l = diag(sB1_BV'*sB1_BV);
-    sB2_BV = squeeze(coordData(13,:,:)-coordData(1,:,:));
-    sB2_BV_n = sB2_BV./sum(sB2_BV.*sB2_BV,1);
-    sB2_BV_l = diag(sB2_BV'*sB2_BV);
-    sB3_BV = squeeze(coordData(24,:,:)-coordData(1,:,:));
-    sB3_BV_n = sB3_BV./sum(sB3_BV.*sB3_BV,1);
-    sB3_BV_l = diag(sB3_BV'*sB3_BV);
+    % sB : sulphur carbon bond
+    % BV : bond vector
+    sB(1).BV = squeeze(coordData(carbonIdx(1),:,:)-coordData(sulphurIdx,:,:))';
+    sB(1).BV_n = sB(1).BV./sum(sB(1).BV.*sB(1).BV,2);
+    sB(1).BV_l = diag(sB(1).BV*sB(1).BV');
+    sB(2).BV = squeeze(coordData(carbonIdx(2),:,:)-coordData(sulphurIdx,:,:))';
+    sB(2).BV_n = sB(2).BV./sum(sB(2).BV.*sB(2).BV,2);
+    sB(2).BV_l = diag(sB(2).BV*sB(2).BV');
+    sB(3).BV = squeeze(coordData(carbonIdx(3),:,:)-coordData(sulphurIdx,:,:))';
+    sB(3).BV_n = sB(3).BV./sum(sB(3).BV.*sB(3).BV,2);
+    sB(3).BV_l = diag(sB(3).BV*sB(3).BV');
 
     % Get the anlges
-    proj_SB1 = diag(b1_n*sB1_BV_n);
-    proj_SB2 = diag(b2_n*sB2_BV_n);
-    proj_SB3 = diag(b3_n*sB3_BV_n);
+    proj_SB1 = diag(b1_n*sB(1).BV_n');
+    proj_SB2 = diag(b2_n*sB(2).BV_n');
+    proj_SB3 = diag(b3_n*sB(3).BV_n');
     figure(graph+1)
     subplot(3,1,1)
-    plot(abs([proj_SB1, proj_SB2, proj_SB3]))
+    plot(pi/2 - acos(abs([proj_SB1, proj_SB2, proj_SB3])))
+    title('S-C bond benzene ring twisting angle')
+    axis([0 inf 0 pi/6])
     subplot(3,1,2)
-    plot(abs([sB1_BV_l, sB2_BV_l, sB3_BV_l]))
+    %plot(abs([sB(1).BV_l, sB(2).BV_l, sB(3).BV_l]))
+    plot(abs([sB.BV_l]))
+    title('Sulphur-Carbon bond length')
     
     % plot the distortiong in the benzene ring
     figure(graph+1)
     subplot(3,1,3)
     plot([b1_r, b2_r b3_r])
+    title('Distortion (off plane variance) of the rings')
+    
+    % Bond data
+    resultObject.sB = sB;
+    % Projections between the benzene normals and the bonds
+    resultObject.proj = [proj_SB1, proj_SB2, proj_SB3];
+    % The relative varianve along the normal direction
+    resultObject.zRelRes = [b1_r, b2_r b3_r];
+    % Results.center
+    resultObject.center = {b1_c b2_c b3_c};
+    
     
 end

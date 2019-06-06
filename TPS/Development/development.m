@@ -71,3 +71,22 @@ TPS_dynamics(rings,1,coordinatesArray05,8100);
 TPS_dynamics(rings,1,coordinatesArray06,8200);
 TPS_dynamics(rings,1,coordinatesArray12,8300);
 
+%% Improve the packaging
+rings = {[2 3 5 7 9 11];[13 14 16 18 20 22];[24 25 27 29 31 33]};
+TPS_dynamics(rings,1,[2 13 24],coordinatesArray05,8100);
+TPS_dynamics(rings,1,[2 13 24],coordinatesArray06,8200);
+TPS_dynamics(rings,1,[2 13 24],coordinatesArray12,8300);
+
+%% Improved packaging
+rings = {[2 3 5 7 9 11];[13 14 16 18 20 22];[24 25 27 29 31 33]};
+results = TPS_dynamics(rings,1,[2 13 24],coordinatesArray05,8100);
+
+%% See if things work out
+size(results.sB(1).BV)
+size([results.sB.BV])
+size([results.sB.BV_l])
+size(results.proj)
+size(results.center)
+size(results.zRelRes)
+% it works, time for the push
+
