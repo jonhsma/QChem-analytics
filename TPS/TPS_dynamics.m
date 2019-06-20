@@ -27,14 +27,14 @@ function resultObject=TPS_dynamics(rings,sulphurIdx,carbonIdx,coordData,graph)
     % sB : sulphur carbon bond
     % BV : bond vector
     sB(1).BV = squeeze(coordData(carbonIdx(1),:,:)-coordData(sulphurIdx,:,:))';
-    sB(1).BV_n = sB(1).BV./sum(sB(1).BV.*sB(1).BV,2);
-    sB(1).BV_l = diag(sB(1).BV*sB(1).BV');
+    sB(1).BV_n = sB(1).BV./sqrt(sum(sB(1).BV.*sB(1).BV,2));
+    sB(1).BV_l = sqrt(diag(sB(1).BV*sB(1).BV')); % This is not computationally efficient. Just so it's not the bottleneck yet
     sB(2).BV = squeeze(coordData(carbonIdx(2),:,:)-coordData(sulphurIdx,:,:))';
-    sB(2).BV_n = sB(2).BV./sum(sB(2).BV.*sB(2).BV,2);
-    sB(2).BV_l = diag(sB(2).BV*sB(2).BV');
+    sB(2).BV_n = sB(2).BV./sqrt(sum(sB(2).BV.*sB(2).BV,2));
+    sB(2).BV_l = sqrt(diag(sB(2).BV*sB(2).BV'));
     sB(3).BV = squeeze(coordData(carbonIdx(3),:,:)-coordData(sulphurIdx,:,:))';
-    sB(3).BV_n = sB(3).BV./sum(sB(3).BV.*sB(3).BV,2);
-    sB(3).BV_l = diag(sB(3).BV*sB(3).BV');
+    sB(3).BV_n = sB(3).BV./sqrt(sum(sB(3).BV.*sB(3).BV,2));
+    sB(3).BV_l = sqrt(diag(sB(3).BV*sB(3).BV'));
 
     % Get the anlges
     proj_SB1 = diag(b1_n*sB(1).BV_n');
@@ -44,7 +44,7 @@ function resultObject=TPS_dynamics(rings,sulphurIdx,carbonIdx,coordData,graph)
     subplot(3,1,1)
     plot(pi/2 - acos(abs([proj_SB1, proj_SB2, proj_SB3])))
     title('S-C bond benzene ring twisting angle')
-    axis([0 inf 0 pi/6])
+    axis([0 inf 0 pi/2])
     subplot(3,1,2)
     %plot(abs([sB(1).BV_l, sB(2).BV_l, sB(3).BV_l]))
     plot(abs([sB.BV_l]))
