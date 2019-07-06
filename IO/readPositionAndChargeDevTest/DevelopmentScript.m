@@ -122,7 +122,7 @@ tic
 [~,~,~]=readPositionsAndChargesX('FSSH.X11.Iter06.error.out');
 toc
 %8.300377
-% after replacing sscanf everywhere
+% after replacing sscanf with textscan everywhere
 tic
 [~,~,~]=readPositionsAndChargesX('FSSH.X1.Iter05.out');
 [~,~,~]=readPositionsAndChargesX('FSSH.X11.Iter06.out');
