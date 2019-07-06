@@ -19,3 +19,9 @@ end
 [elementArray06,coordinatesArray06,chargeArray06]=readPositionsAndCharges('FSSH.X11.Iter06.out');
 disp('Warning on atomic element descrapency between position and charge arrays is expected')
 [elementArray06e,coordinatesArray06e,chargeArray06e]=readPositionsAndCharges('FSSH.X11.Iter06.error.out');
+
+%% Excited state charges
+[elementArrayX,coordinatesArrayX,chargeArray_x]=readPositionsAndChargesX('X-chargeTest.out');
+if size(chargeArray_x,2)~=11
+    disp('The excited state charges are not captured corrected')
+end

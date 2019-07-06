@@ -31,10 +31,18 @@ function [names,positions,charges] = readPositionsAndChargesX(filePath)
         coordinates = zeros([nBrks-4 3]);
 
         for ii = 3:nBrks-2
+            
             [items,nElements] = sscanf(table(lnBrks(ii):lnBrks(ii+1)),'%d %3s %f %f %f');    
             elementLength = size(items,1)-nElements+1;
             element(ii-2,1:elementLength) = items(2:end - 3);    
             coordinates(ii-2,:)= items(end - 2:end);
+            
+            %{
+            items = textscan(table(lnBrks(ii):lnBrks(ii+1)),'%d %3s %f %f %f');    
+            elementLength = size(items{2}{1});
+            element(ii-2,1:elementLength) = items{2}{1};    
+            coordinates(ii-2,:)= [items{3:5}];
+            %}
         end
         if chunk ==1
             % initialize the final array
@@ -65,24 +73,38 @@ function [names,positions,charges] = readPositionsAndChargesX(filePath)
             end
         end
         
-        % the in-loop charge array
-        charge      = zeros([nBrks-5 nExcitedStates 1]);
+        % the in-loop charge array, 
+        charge      = zeros([nBrks-4 nExcitedStates 1]);
+        
             
         for jj = 1:nExcitedStates+1 % +1 to include the ground state
             table = chunkText(positionsStart(jj):positionsEnd(jj));
 
-            lnBrks = regexp(table, '[\n]');
-            nBrks = size(lnBrks,2);
+            % Count the line breaks within each excited state charge table
+            lnBrks_c = regexp(table, '[\n]');
+            nBrks_c = size(lnBrks_c,2);
 
-            element_2   = zeros([nBrks-5 5]);
+            element_2   = zeros([nBrks_c-5 5]);
+            
+            % Charge reading loop temp array
+            charge_inloop = zeros([nBrks_c-5 1]);
 
-            for ii = 4:nBrks-2
-                [items,nElements] = sscanf(table(lnBrks(ii):lnBrks(ii+1)),'%d %3s %f');    
+            for ii = 4:nBrks_c-2
+                
+                [items,nElements] = sscanf(table(lnBrks_c(ii):lnBrks_c(ii+1)),'%d %3s %f');  
                 elementLength = length(items)-nElements+1;
-                element_2(ii-3,1:elementLength) = items(2:end - 1);    
-                charge(ii-3,jj)= items(end);
+                element_2(ii-3,1:elementLength) = items(2:end - 1); 
+                charge_inloop(ii-3)=items(end);
+                
+                %{
+                items = textscan(table(lnBrks_c(ii):lnBrks_c(ii+1)),'%d %3s %f');
+                elementLength = length(items{2}{1});
+                element_2(ii-3,1:elementLength) = items{2}{1}; 
+                charge_inloop(ii-3)=items{3};
+                %}
             end
-
+            
+            charge(:,jj)=charge_inloop;
             % check if the position list and charge list give the same elemets
             if sum(sum(element_2 - element))~=0
                 disp(['Warning: inconsistency in atomic species between charge and position lists.'...
@@ -92,7 +114,7 @@ function [names,positions,charges] = readPositionsAndChargesX(filePath)
         
         if chunk ==1
             % initialize the final array
-            chargeArray     = zeros(nBrks-5,nExcitedStates+1,nSteps);
+            chargeArray     = zeros(nBrks-4,nExcitedStates+1,nSteps);
         end
         chargeArray(:,:,chunk) =   charge;
     end

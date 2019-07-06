@@ -106,3 +106,33 @@ end
 [elementArray05,coordinatesArray05,chargeArray05]=readPositionsAndCharges('FSSH.X1.Iter05.out');
 [elementArray06,coordinatesArray06,chargeArray06]=readPositionsAndCharges('FSSH.X11.Iter06.out');
 [elementArray06e,coordinatesArray06e,chargeArray06e]=readPositionsAndCharges('FSSH.X11.Iter06.error.out');
+
+%% Try to see if using text scan speeds things up (7/5/2019)
+%before
+tic
+[~,~,~]=readPositionsAndChargesX('FSSH.X1.Iter05.out');
+[~,~,~]=readPositionsAndChargesX('FSSH.X11.Iter06.out');
+[~,~,~]=readPositionsAndChargesX('FSSH.X11.Iter06.error.out');
+toc
+%7.39 seconds
+% after replacing sscanf in the excited state charge loop with textscan
+tic
+[~,~,~]=readPositionsAndChargesX('FSSH.X1.Iter05.out');
+[~,~,~]=readPositionsAndChargesX('FSSH.X11.Iter06.out');
+[~,~,~]=readPositionsAndChargesX('FSSH.X11.Iter06.error.out');
+toc
+%8.300377
+% after replacing sscanf everywhere
+tic
+[~,~,~]=readPositionsAndChargesX('FSSH.X1.Iter05.out');
+[~,~,~]=readPositionsAndChargesX('FSSH.X11.Iter06.out');
+[~,~,~]=readPositionsAndChargesX('FSSH.X11.Iter06.error.out');
+toc
+%10.335466
+% restoring all scanf
+tic
+[~,~,~]=readPositionsAndChargesX('FSSH.X1.Iter05.out');
+[~,~,~]=readPositionsAndChargesX('FSSH.X11.Iter06.out');
+[~,~,~]=readPositionsAndChargesX('FSSH.X11.Iter06.error.out');
+toc
+% Holy shit, sscanf is faster....
