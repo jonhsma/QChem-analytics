@@ -73,7 +73,7 @@ function [names,positions,charges] = readPositionsAndChargesX(filePath)
             end
         end
         
-        % the in-loop charge array, 
+        % the in-loop charge array for excited states 
         charge      = zeros([nBrks-4 nExcitedStates 1]);
         
             
@@ -90,11 +90,20 @@ function [names,positions,charges] = readPositionsAndChargesX(filePath)
             charge_inloop = zeros([nBrks_c-5 1]);
 
             for ii = 4:nBrks_c-2
+                %Reading the elements and charges
+                [cElement, cCharge] = getElementAndCharge(table(lnBrks_c(ii):lnBrks_c(ii+1)));
+                element_2(ii-3,1:numel(cElement)) = cElement; 
+                charge_inloop(ii-3)=cCharge;
                 
-                [items,nElements] = sscanf(table(lnBrks_c(ii):lnBrks_c(ii+1)),'%d %3s %f');  
+                
+                %{
+                % The two %f at the end are for redundancy in case there
+                % are more numbers trailing
+                [items,nElements] = sscanf(table(lnBrks_c(ii):lnBrks_c(ii+1)),'%d %3s %f %f %f');  
                 elementLength = length(items)-nElements+1;
-                element_2(ii-3,1:elementLength) = items(2:end - 1); 
-                charge_inloop(ii-3)=items(end);
+                element_2(ii-3,1:elementLength) = items(2:2+elementLength- 1); 
+                charge_inloop(ii-3)=items(2+elementLength);
+                %}
                 
                 %{
                 items = textscan(table(lnBrks_c(ii):lnBrks_c(ii+1)),'%d %3s %f');

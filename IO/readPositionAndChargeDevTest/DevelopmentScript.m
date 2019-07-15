@@ -136,3 +136,40 @@ tic
 [~,~,~]=readPositionsAndChargesX('FSSH.X11.Iter06.error.out');
 toc
 % Holy shit, sscanf is faster....
+
+%% Try the new manual charge reader
+testString = {[' ',9, '1 Si         776521.1358       '];...
+    '1 Si         776521.1358       ';...
+    ' 1 Si         776521.1358       ';...
+    [' 32 Sic ' 9 9 ' 773521.32859']};
+
+testHandles={@(x)sscanf(x,'%d %3s %f %f %f'), @(x)textscan(x,'%d %3s %f'),...
+    @getElementAndCharge,@getElementAndCharge};
+
+nTest = 10000;
+
+for ii = 1:numel(testHandles)
+    fCurr = testHandles{ii};
+    tic
+    for jj = 1: numel(testString)
+        for kk = 1:nTest
+            fCurr(testString{jj});
+        end
+    end
+    toc
+    disp(fCurr)
+end
+
+%% Integrate the new sscanf alternative
+% fscnaf based method
+tic
+[~,~,~]=readPositionsAndChargesX('X-ChargeTest.out');
+toc
+% 11.300366 seconds
+% The new manual reader
+tic
+[~,~,~]=readPositionsAndChargesX('X-ChargeTest.out');
+toc
+%7.766299 secondsm 31% improvement. I won't complain
+
+    
