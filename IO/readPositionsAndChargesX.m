@@ -1,4 +1,4 @@
-function [names,positions,charges] = readPositionsAndChargesX(filePath)
+function [names,positions,charges,activeSurfaceArray] = readPositionsAndChargesX(filePath)
     
     content = fileread(filePath);
 
@@ -51,6 +51,17 @@ function [names,positions,charges] = readPositionsAndChargesX(filePath)
         end
         elementArray(:,:,chunk)     =   element;
         coordinatesArray(:,:,chunk) =   coordinates;
+        %% Active surface
+        positionsStart  =   strfind(chunkText,'Active surface');
+        currLine   =   chunkText(positionsStart+14:positionsStart+20);
+        breaks = find(currLine==32);
+        activeSurface = strFP2double(currLine(breaks(1):breaks(2)));
+        
+        if chunk ==1
+            % initialize the final array
+            activeSurfaceArray = zeros([nSteps,1]);
+        end
+        activeSurfaceArray(chunk) = activeSurface;
         
         %% Charges
         %positionStart   = strfind(chunkText,'Ground-State Mulliken Net Atomic Charges');
@@ -126,13 +137,12 @@ function [names,positions,charges] = readPositionsAndChargesX(filePath)
             chargeArray     = zeros(nBrks-4,nExcitedStates+1,nSteps);
         end
         chargeArray(:,:,chunk) =   charge;
-        
-        %% Active surface
     end
     
     if isempty(positionStart)
         elementArray        =   elementArray(:,:,1:chunk-1); 
         coordinatesArray    =   coordinatesArray(:,:,1:chunk-1);
+        activeSurfaceArray  =   activeSurfaceArray(1:chunk-1);
         if ~isnan(chargeArray)
             chargeArray         =   chargeArray(:,:,1:chunk-1);
         end

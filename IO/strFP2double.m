@@ -11,7 +11,12 @@ function y = strFP2double(input)
         flag = -1;
     end
     dot=find(target==46);
-    nDigit = dot(1)-1;
+    if numel(dot) > 0
+        nDigit = dot(1)-1;
+    else
+        nDigit = numel(target);
+        dot = nDigit+1;
+    end
     nDecimal = numel(target)-dot;
     y=flag*(sum((target(1:dot-1)-48).*exponentDigit(12-nDigit:end))+...
         sum((target(dot+1:end)-48).*exponentDecim(1:nDecimal)));

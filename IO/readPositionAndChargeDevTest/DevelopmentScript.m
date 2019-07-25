@@ -173,6 +173,11 @@ toc
 %7.766299 secondsm 31% improvement. I won't complain
 
 %% strFP2double can't handle negative sign, deal with it (7/24)
+% done 
+
+%% Add the capability to read the active surface
+[~,~,testC,testS]=readPositionsAndChargesX('FSSH.X11.Iter06.out');
+plot(testS)
 
 
     
