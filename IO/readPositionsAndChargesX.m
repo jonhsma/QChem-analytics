@@ -126,6 +126,8 @@ function [names,positions,charges] = readPositionsAndChargesX(filePath)
             chargeArray     = zeros(nBrks-4,nExcitedStates+1,nSteps);
         end
         chargeArray(:,:,chunk) =   charge;
+        
+        %% Active surface
     end
     
     if isempty(positionStart)

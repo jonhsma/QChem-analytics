@@ -172,4 +172,7 @@ tic
 toc
 %7.766299 secondsm 31% improvement. I won't complain
 
+%% strFP2double can't handle negative sign, deal with it (7/24)
+
+
     
