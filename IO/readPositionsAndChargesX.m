@@ -7,6 +7,13 @@ function [names,positions,charges,activeSurfaceArray] = readPositionsAndChargesX
     nSteps = size(labelLocations,2);
     labelLocations = [labelLocations size(content,2)];
     nExcitedStates = 0;
+    
+    %% Some other initializations
+    positionStart = [];
+    elementArray        =   [];
+    coordinatesArray    =   [];
+    activeSurfaceArray  =   [];
+    chargeArray         =   [];
 
     %% Go through the chunks
     for chunk = 1: nSteps        
@@ -139,7 +146,8 @@ function [names,positions,charges,activeSurfaceArray] = readPositionsAndChargesX
         chargeArray(:,:,chunk) =   charge;
     end
     
-    if isempty(positionStart)
+    % truncate the arrays if the trajectory ends prematurely
+    if isempty(positionStart)&& ~isempty(chunk)
         elementArray        =   elementArray(:,:,1:chunk-1); 
         coordinatesArray    =   coordinatesArray(:,:,1:chunk-1);
         activeSurfaceArray  =   activeSurfaceArray(1:chunk-1);
