@@ -25,3 +25,6 @@ disp('Warning on atomic element descrapency between position and charge arrays i
 if size(chargeArray_x,2)~=11
     disp('The excited state charges are not captured corrected')
 end
+
+%% Check compatibility if an extra task is there behind the AIMD
+[elementArrayTT,coordinatesArrayTT,chargeArray_TT]=readPositionsAndChargesX('TwoTaskDemo.out');

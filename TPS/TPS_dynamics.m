@@ -40,21 +40,25 @@ function resultObject=TPS_dynamics(rings,sulphurIdx,carbonIdx,coordData,graph)
     proj_SB1 = diag(b1_n*sB(1).BV_n');
     proj_SB2 = diag(b2_n*sB(2).BV_n');
     proj_SB3 = diag(b3_n*sB(3).BV_n');
-    figure(graph)
-    subplot(3,1,1)
-    plot(pi/2 - acos(abs([proj_SB1, proj_SB2, proj_SB3])))
-    title('S-C bond benzene ring twisting angle')
-    axis([0 inf 0 pi/2])
-    subplot(3,1,2)
-    %plot(abs([sB(1).BV_l, sB(2).BV_l, sB(3).BV_l]))
-    plot(abs([sB.BV_l]))
-    title('Sulphur-Carbon bond length')
     
-    % plot the distortiong in the benzene ring
-    figure(graph)
-    subplot(3,1,3)
-    plot([b1_r, b2_r b3_r])
-    title('Distortion (off plane variance) of the rings')
+    if graph ~=0
+        figure(graph)
+        subplot(3,1,1)
+        plot(pi/2 - acos(abs([proj_SB1, proj_SB2, proj_SB3])))
+        title('S-C bond benzene ring twisting angle')
+        axis([0 inf 0 pi/2])
+        subplot(3,1,2)
+        %plot(abs([sB(1).BV_l, sB(2).BV_l, sB(3).BV_l]))
+        plot(abs([sB.BV_l]))
+        title('Sulphur-Carbon bond length')
+
+        % plot the distortiong in the benzene ring
+    
+        figure(graph)
+        subplot(3,1,3)
+        plot([b1_r, b2_r b3_r])
+        title('Distortion (off plane variance) of the rings')
+    end
     
     % Bond data
     resultObject.sB = sB;

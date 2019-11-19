@@ -5,7 +5,16 @@ function [names,positions,charges,activeSurfaceArray] = readPositionsAndChargesX
     %% Locate the dividers
     labelLocations = strfind(content, 'TIME STEP');
     nSteps = size(labelLocations,2);
-    labelLocations = [labelLocations size(content,2)];
+    
+    % Locate the end of session
+    completionIndicator = strfind(content, 'TIME STEPS COMPLETED'); % It's not the fastest way but I'm not gold platting it
+    if isempty (completionIndicator)
+        termination = size(content,2);
+    else
+        termination = completionIndicator(1); % In case there is another on following...
+    end
+    
+    labelLocations = [labelLocations termination];
     nExcitedStates = 0;
     
     %% Some other initializations
@@ -60,9 +69,13 @@ function [names,positions,charges,activeSurfaceArray] = readPositionsAndChargesX
         coordinatesArray(:,:,chunk) =   coordinates;
         %% Active surface
         positionsStart  =   strfind(chunkText,'Active surface');
-        currLine   =   chunkText(positionsStart+14:positionsStart+20);
-        breaks = find(currLine==32);
-        activeSurface = strFP2double(currLine(breaks(1):breaks(2)));
+        if ~isempty(positionsStart)
+            currLine   =   chunkText(positionsStart+14:positionsStart+20);
+            breaks = find(currLine==32);
+            activeSurface = strFP2double(currLine(breaks(1):breaks(2)));
+        else
+            activeSurface = 0;
+        end
         
         if chunk ==1
             % initialize the final array
