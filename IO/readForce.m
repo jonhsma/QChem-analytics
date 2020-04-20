@@ -1,5 +1,7 @@
-% This function gathers information from single point calculations outputs
-function data = readSP(jobString)
+% This function gathers information from force calculations output files.
+% Note that if you feed a SP file into it, it would pretty much work like
+% read SP
+function data = readForce(jobString)
     lineBreaks = regexp(jobString,'[\n]');
     %% Get the positions
     positionStart   = strfind(jobString,'Standard Nuclear Orientation (Angstroms)');
@@ -10,9 +12,12 @@ function data = readSP(jobString)
 
         lnBrks = regexp(table, '[\n]');
         nBrks = size(lnBrks,2);
+        nAtoms = nBrks-4;
 
-        element     = zeros([nBrks-4 5]);
-        coordinates = zeros([nBrks-4 3]);
+        element     = zeros([nAtoms 5]);
+        coordinates = zeros([nAtoms 3]);
+        
+        
 
         for ii = 3:nBrks-2
             [items,nElements] = sscanf(table(lnBrks(ii):lnBrks(ii+1)),'%d %3s %f %f %f');    
@@ -87,10 +92,10 @@ function data = readSP(jobString)
     data.occAlpha = str2num(occOrb_energyString);
     
     % Then the virtural orbitals
-    virOrb_start    =   min(lineBreaks(lineBreaks>temp(1)));
+    virOrb_start    =   min(lineBreaks(lineBreaks>occupiedOrbitals_end));
     %virOrb_start    =   virOrb_start(min(end,3));
-    temp = regexp(jobString(virOrb_start:end),'--------------------------------')+ virOrb_start;
-    virOrb_end      =   max(lineBreaks(lineBreaks<temp(1)));
+    temp = lineBreaks(diff(lineBreaks)<=2);
+    virOrb_end      =   min(temp(temp>virOrb_start));
     
     virOrbLines = splitlines(jobString(virOrb_start+1:virOrb_end-1));
     
@@ -104,41 +109,61 @@ function data = readSP(jobString)
     
     %% Get the beta orbital energies (only works for unrestricted calculations)
     occupiedOrbitals_start = regexp(jobString,'Beta MOs');
-    if ~isempty(occupiedOrbitals_start)
-        temp = regexp(jobString,'-- Virtual --');
-        occupiedOrbitals_end = min(temp(temp>occupiedOrbitals_start))-1;
-
-        % Now I have the range, find all the relavant line breaks
-        lb_occOrb = lineBreaks(lineBreaks>occupiedOrbitals_start&lineBreaks<occupiedOrbitals_end);
-        lb_occOrb = lb_occOrb(2:end);
-        occOrbLines = splitlines(jobString(lb_occOrb(1)+1:lb_occOrb(end)));
-
-        occOrb_energyString = [];
-        for ii = 1 : numel(occOrbLines)
-            if sum(occOrbLines{ii}>=65) == 0
-                occOrb_energyString = [occOrb_energyString ' ' occOrbLines{ii}];
-            end
-        end    
-        data.occBeta = str2num(occOrb_energyString);
-
-        % Then the virtural orbitals
-        virOrb_start    =   min(lineBreaks(lineBreaks>occupiedOrbitals_end));
-        %virOrb_start    =   virOrb_start(min(end,3));
-        temp = regexp(jobString,'---------');
-        virOrb_end      =   min(temp(temp>virOrb_start));
-
-        virOrbLines = splitlines(jobString(virOrb_start+1:virOrb_end-1));
-
-        virOrb_energyString = [];
-        for ii = 1 : numel(virOrbLines)
-            if sum(virOrbLines{ii}>=65) == 0
-                virOrb_energyString = [virOrb_energyString ' ' virOrbLines{ii}];
-            end
+    temp = regexp(jobString,'-- Virtual --');
+    occupiedOrbitals_end = min(temp(temp>occupiedOrbitals_start))-1;
+    
+    % Now I have the range, find all the relavant line breaks
+    lb_occOrb = lineBreaks(lineBreaks>occupiedOrbitals_start&lineBreaks<occupiedOrbitals_end);
+    lb_occOrb = lb_occOrb(2:end);
+    occOrbLines = splitlines(jobString(lb_occOrb(1)+1:lb_occOrb(end)));
+    
+    occOrb_energyString = [];
+    for ii = 1 : numel(occOrbLines)
+        if sum(occOrbLines{ii}>=65) == 0
+            occOrb_energyString = [occOrb_energyString ' ' occOrbLines{ii}];
         end
-        data.virBeta = str2num(virOrb_energyString);
-    else 
-        data.virBeta = -1;
-        data.occBeta = -1;
+    end    
+    data.occBeta = str2num(occOrb_energyString);
+    
+    % Then the virtural orbitals
+    virOrb_start    =   min(lineBreaks(lineBreaks>occupiedOrbitals_end));
+    %virOrb_start    =   virOrb_start(min(end,3));
+    temp = regexp(jobString,'---------');
+    virOrb_end      =   min(temp(temp>virOrb_start));
+    
+    virOrbLines = splitlines(jobString(virOrb_start+1:virOrb_end-1));
+    
+    virOrb_energyString = [];
+    for ii = 1 : numel(virOrbLines)
+        if sum(virOrbLines{ii}>=65) == 0
+            virOrb_energyString = [virOrb_energyString ' ' virOrbLines{ii}];
+        end
+    end
+    data.virBeta = str2num(virOrb_energyString);
+    
+    %% Get the forces
+    positionStart = strfind(jobString,'Gradient of SCF Energy');
+    if ~isempty(positionStart)
+        positionEnd = strfind(jobString,'Max gradient component');
+        
+        forceString = jobString(positionStart:positionEnd);
+        
+        lnBrks = regexp(forceString, '[\n]');
+        nBrks = size(lnBrks,2);
+        nLines = (nBrks-1)/4;
+        
+        forceArray = zeros([3 nAtoms]);
+        
+        currentPos=1;
+        for jj = 0:nLines - 1
+            currChunk = str2double(forceString(lnBrks(jj*4+2)+1:lnBrks(jj*4+5)-2));
+            nextPos = currentPos+size(currChunk,2)-1;
+            forceArray(:,currentPos:nextPos-1) = currChunk(:,2:end);
+            currentPos = nextPos;
+        end
+        
+        disp(positionString);
+        data.force = forceArray;
     end
 end
 

@@ -1,0 +1,61 @@
+You are running Q-Chem version: 5.1.2
+
+#
+# job setting
+#
+local host:  n0144.vulcan0
+current dir: /global/home/users/jhansonma/data/MethodTests/TRNSS_Test/SRC1-R1-R_def2-SVP_250rts_allvir/1_4_dibutylbenzene
+input file:  trnss_av.in
+output file: trnss_av.out
+nprocs     : 32
+nthreads   : 4
+#
+# qchem installation setting
+#
+QC:          /global/home/groups-sw/nano/software/sl-7.x86_64/qchem/5.1.2
+QCAUX:       /global/home/groups-sw/nano/software/sl-7.x86_64/qchem/5.1.2/qcaux
+QCPROG:      /global/home/groups-sw/nano/software/sl-7.x86_64/qchem/5.1.2/exe/qcprog.exe
+QCPROG_S:    /global/home/groups-sw/nano/software/sl-7.x86_64/qchem/5.1.2/exe/qcprog.exe_s
+PARALLEL:    -DPARALLEL
+QCMPI:       mpich3
+#
+# qchem directory setting
+#
+qcrun:       temp
+QCSCRATCH:   ./QC_SCR
+QCLOCALSCR:  
+QCTMPDIR:    ./QC_SCR
+QCFILEPREF:  ./QC_SCR/temp
+QCSAVEDIR:   ./QC_SCR/temp
+workdirs:    ./QC_SCR/temp.0 -- ./QC_SCR/temp.31
+workdir0:    ./QC_SCR/temp.0
+partmpdirs =  
+#
+# parallel setting
+#
+QCRSH:           /usr/bin/ssh
+QCMPI:           mpich3
+QCMPIRUN:        mpirun
+QCMACHINEFILE:   ./temphostfile
+n0144.vulcan0
+n0145.vulcan0
+n0146.vulcan0
+n0147.vulcan0
+n0149.vulcan0
+n0150.vulcan0
+n0151.vulcan0
+n0152.vulcan0
+n0153.vulcan0
+n0154.vulcan0
+n0156.vulcan0
+n0157.vulcan0
+n0158.vulcan0
+n0160.vulcan0
+n0161.vulcan0
+n0179.vulcan0
+
+#
+# env setting
+#
+exported envs:   QC QCAUX QCSCRATCH QCRUNNAME QCFILEPREF QCPROG QCPROG_S GUIFILE
+copy savedir ...

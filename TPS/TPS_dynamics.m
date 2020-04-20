@@ -27,16 +27,23 @@ function resultObject=TPS_dynamics(rings,sulphurIdx,carbonIdx,coordData,graph)
     % sB : sulphur carbon bond
     % BV : bond vector
     sB(1).BV = squeeze(coordData(carbonIdx(1),:,:)-coordData(sulphurIdx,:,:))';
+    sB(2).BV = squeeze(coordData(carbonIdx(2),:,:)-coordData(sulphurIdx,:,:))';
+    sB(3).BV = squeeze(coordData(carbonIdx(3),:,:)-coordData(sulphurIdx,:,:))';
+    if size(b1_n,1)==1
+        % if there is only one step then squeeze would transpose BV
+        sB(1).BV = sB(1).BV';
+        sB(2).BV = sB(2).BV';
+        sB(3).BV = sB(3).BV';
+    end
     sB(1).BV_n = sB(1).BV./sqrt(sum(sB(1).BV.*sB(1).BV,2));
     sB(1).BV_l = sqrt(diag(sB(1).BV*sB(1).BV')); % This is not computationally efficient. Just so it's not the bottleneck yet
-    sB(2).BV = squeeze(coordData(carbonIdx(2),:,:)-coordData(sulphurIdx,:,:))';
     sB(2).BV_n = sB(2).BV./sqrt(sum(sB(2).BV.*sB(2).BV,2));
     sB(2).BV_l = sqrt(diag(sB(2).BV*sB(2).BV'));
-    sB(3).BV = squeeze(coordData(carbonIdx(3),:,:)-coordData(sulphurIdx,:,:))';
     sB(3).BV_n = sB(3).BV./sqrt(sum(sB(3).BV.*sB(3).BV,2));
     sB(3).BV_l = sqrt(diag(sB(3).BV*sB(3).BV'));
 
     % Get the anlges
+
     proj_SB1 = diag(b1_n*sB(1).BV_n');
     proj_SB2 = diag(b2_n*sB(2).BV_n');
     proj_SB3 = diag(b3_n*sB(3).BV_n');

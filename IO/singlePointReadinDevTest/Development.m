@@ -2,6 +2,8 @@
 set(0,'DefaultFigureWindowStyle','Docked')
 addpath('..\')
 addpath('SampleData')
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 1/2/2020  Put the positions back into the code
 %% The cropping Tool
 fileString = fileread('SampleData\PBE0.def2-QZVPD.C10H8.out');
 jobStrings = cropJob(fileString);
