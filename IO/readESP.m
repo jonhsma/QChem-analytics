@@ -2,8 +2,9 @@
 % It retains its original Nx4 structure. 
 function y = readESP(filePath)
     esp_string = fileread(filePath);
-    lb = find(esp_string==10,3);
-    esp_matrix=str2num(esp_string(lb(end):end));
+	lb0 = find(esp_string=='X',1);
+    lb1 = find(esp_string(lb0:end)==10,1);
+    esp_matrix=str2num(esp_string(lb0+lb1:end));
     
     y = esp_matrix;
 end

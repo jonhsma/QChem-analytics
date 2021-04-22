@@ -4,8 +4,9 @@ function y = BatchImportWrapper(path,varargin)
     else
         reader = @readPositionsAndCharges;
     end
-    [names,positions,charges] = reader(path);
+    [names,positions,charges,activeSurface] = reader(path);
     y.names = names;
     y.positions = positions;
     y.charges = charges;
+	y.activeSurface = activeSurface;
 end

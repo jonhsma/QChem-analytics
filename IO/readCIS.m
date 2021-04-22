@@ -3,13 +3,27 @@
 
 function results = readCIS(jobstring)
     %Identify the marker where the CIS session starts
-    marker_beginning = regexp(jobstring,'TDDFT/TDA Excitation Energies','ONCE');
+    marker_beginning = regexp(jobstring,'Excitation Energies','ONCE');
+	
+	% The type of TDDFT
+	%	0	TDA/TDDFT
+	%	1	SA-SF-RPA
+	type = 0;
+	
     
     if isempty(marker_beginning)
         results = -1;
         return;
     else
-        marker_end = regexp(jobstring,'SETman timing summary','ONCE');
+%       marker_end = regexp(jobstring,...'SETman timing summary','ONCE');
+		marker_end = regexp(jobstring(marker_beginning:end),...
+			'time','ONCE')+...
+			marker_beginning-1;
+		if ~isempty(regexp(jobstring,'SA-SF-RPA','ONCE'))
+			type =1;
+		elseif ~isempty(regexp(jobstring,'SF-DFT','ONCE'))
+			type = 2;
+		end
     end
     
     % Crop out the array and locate the line breaks
@@ -23,14 +37,31 @@ function results = readCIS(jobstring)
         % Get the excited state number and the energy
         results(ii).xNumber     =   str2double(lines{1}(14:17));
         results(ii).xEnergy     =   str2double(lines{1}(44:end));
-        %fprintf("State %6d\t Energy: %10.5f \n",xNumber,xEnergy)
-        results(ii).xMoments = [str2double(lines{4}(18:24));...
-            str2double(lines{4}(29:35));...
-            str2double(lines{4}(40:46))];
-        results(ii).strength = str2double(lines{5}(17:end));
-        % Get the spin 
-        if lines{3}(5)=="M"
-            switch lines{3}(19)
+		%results(ii).tEnergy     =   str2double(lines{2}(28:59));
+		line_data = sscanf(strip(lines{2}),"Total energy for state %d: %f %s");
+		results(ii).tEnergy = line_data(2);
+		
+		%The transition moments
+		if type == 1 || type ==2
+			results(ii).xMoments = [NaN NaN NaN];
+			results(ii).strength = NaN;	
+		else
+			results(ii).xMoments = [str2double(lines{4}(18:24));...
+				str2double(lines{4}(29:35));...
+				str2double(lines{4}(40:46))];
+			results(ii).strength = str2double(lines{5}(17:end));
+		end
+		
+		
+		% Get the spin 
+		if lines{3}(5)=="M" || type==1
+			% Restrict calculations
+			if type == 1
+				key = lines{3}(5);
+			else
+				key = lines{3}(19);
+			end
+            switch key
                 case "S" 
                     results(ii).S2 = 0;
                 case "D" 
@@ -41,8 +72,8 @@ function results = readCIS(jobstring)
                     results(ii).S2 = 15/4;
             end
         else
-            % In progress
-            results(ii).S2 = -1;
-        end
+            % Unrestricted calculations
+            results(ii).S2 = str2double(lines{3}(18:24));
+		end
     end    
 end

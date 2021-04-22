@@ -1,10 +1,21 @@
 % This function gathers information from single point calculations outputs
 function data = readSP(jobString)
     lineBreaks = regexp(jobString,'[\n]');
+	
+	%Set the default outputs in case the computation crashes
+	data.virAlpha   =   NaN;
+    data.occAlpha   =   NaN;
+    data.occBeta    =   NaN;
+    data.virBeta    =   NaN;
+	data.energy		=	NaN;
+	
     %% Get the positions
     positionStart   = strfind(jobString,'Standard Nuclear Orientation (Angstroms)');
     if ~isempty(positionStart)
-        positionEnd     = strfind(jobString,'Molecular Point Group');
+        %positionEnd     = strfind(jobString,'Molecular Point Group');
+		positionEnd     = strfind(jobString(positionStart:end),...
+			'----------------------------------------------------------------');
+		positionEnd	= positionEnd(2)+positionStart;
 
         table = jobString(positionStart:positionEnd-1);
 
@@ -14,7 +25,7 @@ function data = readSP(jobString)
         element     = zeros([nBrks-4 5]);
         coordinates = zeros([nBrks-4 3]);
 
-        for ii = 3:nBrks-2
+        for ii = 3:nBrks-1
             [items,nElements] = sscanf(table(lnBrks(ii):lnBrks(ii+1)),'%d %3s %f %f %f');    
             elementLength = size(items,1)-nElements+1;
             element(ii-2,1:elementLength) = items(2:end - 3);    
@@ -25,15 +36,17 @@ function data = readSP(jobString)
         data.coordinates =   coordinates;
     end 
     %% Get the basis
-    b_Start = sort([regexp(jobString,'BASIS '),regexp(jobString,'BASIS[\t]')]);
+    b_Start = sort([regexp(jobString,'BASIS ','ignorecase'),...
+		regexp(jobString,'BASIS[\t]','ignorecase')]);
     line_temp = jobString(b_Start(1):min(lineBreaks(lineBreaks>b_Start(1)))-1);
-    obj_temp = textscan(line_temp,"%s %s");
+    obj_temp = textscan(erase(line_temp,'='),"%s %s");
     data.basis = obj_temp{2}{1};
     
     %% Get the method
-    m_Start = sort([regexp(jobString,'METHOD '),regexp(jobString,'METHOD[\t]')]);
+    m_Start = sort([regexp(jobString,'METHOD ','ignorecase'),...
+		regexp(jobString,'METHOD[\t]','ignorecase')]);
     line_temp = jobString(m_Start(1):min(lineBreaks(lineBreaks>m_Start(1)))-1);
-    obj_temp = textscan(line_temp,"%s %s");
+    obj_temp = textscan(erase(line_temp,'='),"%s %s");
     data.method = obj_temp{2}{1};
     
     %% Get the final energy
@@ -90,7 +103,12 @@ function data = readSP(jobString)
     virOrb_start    =   min(lineBreaks(lineBreaks>temp(1)));
     %virOrb_start    =   virOrb_start(min(end,3));
     temp = regexp(jobString(virOrb_start:end),'--------------------------------')+ virOrb_start;
-    virOrb_end      =   max(lineBreaks(lineBreaks<temp(1)));
+	% In case the separator doesn't exist
+	temp2 = regexp(jobString(virOrb_start:end),"Beta")+ virOrb_start;
+	marker = min([temp temp2]);
+	
+	
+    virOrb_end      =   max(lineBreaks(lineBreaks<marker));
     
     virOrbLines = splitlines(jobString(virOrb_start+1:virOrb_end-1));
     
@@ -139,6 +157,36 @@ function data = readSP(jobString)
     else 
         data.virBeta = -1;
         data.occBeta = -1;
-    end
+	end
+	
+	%% Charges
+	positionStart   = strfind(jobString,'Ground-State Mulliken Net Atomic Charges');
+	if ~isempty(positionStart)
+		positionEnd     = strfind(jobString,'Sum of atomic charges');
+
+		table = jobString(positionStart:positionEnd-1);
+
+		lnBrks = regexp(table, '[\n]');
+		nBrks = size(lnBrks,2);
+
+		element_2   = zeros([nBrks-5 5]);
+		charge      = zeros([nBrks-5 1]);
+
+		for ii = 4:nBrks-2
+			[items,nElements] = sscanf(table(lnBrks(ii):lnBrks(ii+1)),'%d %3s %f %f');    
+			elementLength = length(items)-nElements+1;
+			element_2(ii-3,1:elementLength) = items(2:2+elementLength - 1);    
+			charge(ii-3)= items(2+elementLength);
+		end
+
+		% check if the position list and charge list give the same elemets
+		if sum(sum(element_2 - element))~=0
+			disp(['Warning: inconsistency in atomic species between charge and position lists.'])
+		end
+		
+	else
+		charge = NaN;
+	end
+	data.charge = charge;
 end
 
